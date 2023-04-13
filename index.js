@@ -88,6 +88,13 @@ async function run() {
     const source = sourceInput();
     const failBuild = core.getInput("fail-build") || "true";
     const outputFormat = core.getInput("output-format") || "sarif";
+    let outputFile = core.getInput("output-file") || "";
+    if (outputFormat === "sarif") {
+      outputFile = outputFile || "results.sarif";
+    }
+    else if (outputFormat === "json") {
+      outputFile = outputFile || "results.json";
+    }
     const severityCutoff = core.getInput("severity-cutoff") || "medium";
     const onlyFixed = core.getInput("only-fixed") || "false";
     const addCpesIfNone = core.getInput("add-cpes-if-none") || "false";
@@ -174,6 +181,7 @@ async function runScan({ source, failBuild, severityCutoff, onlyFixed, outputFor
   core.debug("Only Fixed: " + onlyFixed);
   core.debug("Add Missing CPEs: " + addCpesIfNone);
   core.debug("Output Format: " + outputFormat);
+  core.debug("Output File: " + outputFile);
 
   core.debug("Creating options for GRYPE analyzer");
 
@@ -229,15 +237,13 @@ async function runScan({ source, failBuild, severityCutoff, onlyFixed, outputFor
 
   switch (outputFormat) {
     case "sarif": {
-      const SARIF_FILE = "./results.sarif";
-      fs.writeFileSync(SARIF_FILE, cmdOutput);
-      out.sarif = SARIF_FILE;
+]     fs.writeFileSync(outputFile, cmdOutput);
+      out.sarif = outputFile;
       break;
     }
     case "json": {
-      const REPORT_FILE = "./results.json";
-      fs.writeFileSync(REPORT_FILE, cmdOutput);
-      out.json = REPORT_FILE;
+      fs.writeFileSync(outputFile, cmdOutput);
+      out.json = outputFile;
       break;
     }
     default: // e.g. table
